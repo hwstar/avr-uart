@@ -3,7 +3,7 @@ avr-uart
 
 An interrupt-driven UART Library for 8-bit AVR microcontrollers and stream support for printf/scanf
 
-Derived from work by Peter Fleury, Andy Gock
+Derived from work by Peter Fleury, Andy Gock.
 This is a fork of https://github.com/andygock/avr-uart
 
 This fork provides one extra function uartstream_init() and sets the receive and TX buffers to 16 bytes.
