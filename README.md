@@ -1,56 +1,21 @@
 avr-uart
 ========
 
-An interrupt driven UART Library for 8-bit AVR microcontrollers
+An interrupt-driven UART Library for 8-bit AVR microcontrollers and stream support for printf/scanf
 
-Maintained by Andy Gock
+Derived from work by Peter Fleury, Andy Gock
+This is a fork of https://github.com/andygock/avr-uart
 
-https://github.com/andygock/avr-uart
+This fork provides one extra function uartstream_init() and sets the receive and TX buffers to 16 bytes.
 
-Derived from original library by Peter Fleury
+FILE *uartstream_init(uint32_t baudrate)
 
-Interrupt UART library using the built-in UART with transmit and receive circular buffers.
+Initializes uart #0 baud rate and interrupt handler. Returns a file handle pointer which can be used
+for both reading and writing.
 
-An interrupt is generated when the UART has finished transmitting or
-receiving a byte. The interrupt handling routines use circular buffers
-for buffering received and transmitted data.
+Once you have the file handle, you can assign it to stdout and stdin so that libc functions
+such as printf() and scanf() can be used send and receive data using the uart.
 
-## Setting up
 
-The `UART_RXn_BUFFER_SIZE` and `UART_TXn_BUFFER_SIZE` constants define
-the size of the circular buffers in bytes. Note that these constants must be a power of 2.
-You may need to adapt this constants to your target and your application by adding to your
-compiler options:
 
-	-DUART_RXn_BUFFER_SIZE=nn -DUART_TXn_BUFFER_SIZE=nn
  
-`RXn` and `TXn` refer to UART number, for UART3 with 128 byte buffers, add:
-
-	-DUART_RX3_BUFFER_SIZE=128 -DUART_TX3_BUFFER_SIZE=128
-
-UART0 is always enabled by default, to enable the other available UARTs, add the following
-to your compiler options (or symbol options), for the relevant USART number:
-
-	-DUSART1_ENABLED -DUSART2_ENABLED -DUSART3_ENABLED
- 
-To enable large buffer support (over 256 bytes, up to 2^16 bytes) use:
-
-	-DUSARTn_LARGE_BUFFER
-	
-Where n = USART number.
-
-Supports AVR devices with up to 4 hardware USARTs.
-
-## Documentation
-
-Doxygen based documentation will be coming soon.
-
-## Notes
-
-### Buffer overflow behaviour
-
-When the RX circular buffer is full, and it receives further data from the UART, a buffer overflow condition occurs. Any new data is dropped. The RX buffer must be read before any more incoming data from the UART is placed into the RX buffer.
-
-If the TX buffer is full, and new data is sent to it using one of the `uartN_put*()` functions, this function will loop and wait until the buffer is not full any more. It is important to make sure you have not disabled your UART transmit interrupts (`TXEN*`) elsewhere in your application (e.g with `cli()`) before calling the `uartN_put*()` functions, as the application will lock up. The UART interrupts are automatically enabled when you use the `uartN_init()` functions. This is probably not the idea behaviour, I'll probably fix this some time.
-
-For now, make sure `TXEN*` interrupts are enabled when calling `uartN_put*()` functions. This should not be an issue unless you have code elsewhere purposely turning it off.
